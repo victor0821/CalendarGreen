@@ -1,0 +1,17 @@
+[project]
+name = "calendargreen"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "setrix", email = "aleman0821@outlook.es" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "strands-agents[gemini]>=1.63.0",
+    "strands-agents-tools>=0.8.11",
+    "python-dotenv>=1.2.4",
+]
+
+[tool.uv]
+package = false

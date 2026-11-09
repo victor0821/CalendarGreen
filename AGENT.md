@@ -86,9 +86,10 @@ La carpeta **`UX/`** en la raíz del repositorio contiene los diseños de las pa
 | `03-calendario-mes` | Calendario, vista mes | `/calendario` | Diseñada |
 | `04-calendario-semana` | Calendario, vista semana | `/calendario` | Diseñada |
 | `05-asistente-voz` | Asistente de voz: transcripción editable y tarjeta de propuesta | `/calendario` (panel lateral) | Diseñada |
-| `06-tarea-manual` | Nueva tarea manual, con aviso de límite de Gemini agotado | `/tareas/nueva` | Diseñada |
-| — | Calendario, vista día | `/calendario` | **Pendiente de diseñar** |
-| — | Versión móvil / Android de todas las pantallas | — | **Pendiente de diseñar** |
+| `06-tarea-manual` | Nueva tarea manual, con aviso de límite de Gemini agotado. **v2 (2026-11-08):** hora de inicio y final, tarea a repetir y notificar | `/tareas/nueva` | Diseñada |
+| `07-calendario-dia` | Calendario, vista día, con panel «Tareas del día» | `/calendario` | Diseñada |
+| `08-android-login` | Iniciar sesión, versión móvil / Android (`UX/UX-Movil/`) | `/login` | Diseñada |
+| — | Resto de pantallas móviles / Android | — | **Pendiente de diseñar** |
 
 > Los diseños actuales están pensados para escritorio (web). En pantallas angostas, la barra lateral pasa arriba y las grillas se desplazan; el diseño móvil específico aún no existe.
 
@@ -129,24 +130,24 @@ Cada módulo se convierte en una o más features con su carpeta en `specs/`.
 
 1. **Autenticación y cuentas** — registro con correo y contraseña (al registrarse se inicia sesión), login, cierre de sesión, validación de sesión al abrir la app, zona de calendario protegida.
 2. **Calendario y tareas** — vistas mes, semana y día; crear, editar, mover (arrastrar), completar y borrar tareas; formulario manual.
-3. **Agente por texto** — endpoint que recibe un comando en español y devuelve una propuesta de tarea o una pregunta de aclaración, sin guardar nada.
+3. **Agente con herramientas (texto)** — endpoint que recibe un comando en español; el agente **agenda, consulta, modifica y elimina** tareas mediante herramientas y devuelve una respuesta, una pregunta o **acciones propuestas** que el usuario **confirma** con una tarjeta. Las herramientas de escritura no ejecutan nada por sí mismas.
 4. **Voz en la web** — botón de micrófono, transcripción editable, tarjeta de confirmación.
 5. **App Android y recordatorios** — empaquetado con Capacitor, voz nativa, notificaciones locales, copia local de tareas para uso sin conexión.
-6. **Consultas de agenda por voz** *(fase posterior)* — «¿qué tengo el lunes?».
-7. **Tareas recurrentes** *(fase posterior)* — «todos los lunes».
+6. **Consultas de agenda** — *(incorporadas a la feature 003 el 2026-11)* «¿qué tengo el lunes?», por texto o por voz.
+7. **Tareas recurrentes** — *(incorporadas a la feature 002 el 2026-11-08)* cada semana, de lunes a viernes, todos los días o días personalizados; se guardan como tareas reales con renovación automática.
 
 ### Flujo principal (referencia)
 ```
 Voz/texto → transcripción editable → POST /agent/command → propuesta o pregunta
          → usuario confirma → POST /tasks → calendario + recordatorio local (Android)
 ```
-El agente **nunca escribe** en la base de datos: solo propone.
+El agente **no escribe directamente** en la base de datos: sus herramientas de escritura solo **preparan** acciones; el cambio lo ejecuta la API normal cuando el usuario confirma.
 
 ---
 
 ## 6. Reglas de dominio
 
-- **Agente que propone, usuario que confirma.** Ninguna tarea creada por voz o texto se guarda sin una tarjeta de confirmación con título, fecha y hora.
+- **Agente que prepara, usuario que confirma.** El agente decide qué hacer con lo que dice el usuario (agendar, consultar, modificar, eliminar), pero **ningún cambio se ejecuta sin una tarjeta de confirmación** con el detalle exacto (título, fecha y hora, o la tarea afectada). Aplica a toda acción de voz o texto.
 - **El agente no inventa.** Si falta la fecha o la hora, hace **una** pregunta corta; no asume valores.
 - **Fechas relativas** («mañana», «el viernes», «en dos horas»): el prompt del agente recibe la fecha actual, el día de la semana y la zona horaria del usuario, porque el modelo no conoce la fecha. La tarjeta muestra el día de la semana y cómo se entendió la fecha.
 - **Validación en servidor** de lo que devuelve el agente: ISO 8601 con zona horaria y no anterior a hoy; si falla, se pide aclaración.
@@ -155,17 +156,20 @@ El agente **nunca escribe** en la base de datos: solo propone.
 - **Cuota gratuita de Gemini:** al agotarse, el backend responde 429 con un mensaje claro y la interfaz ofrece el formulario manual sin perder la transcripción. Tope propio de **20 comandos por usuario y día** para proteger la cuota compartida.
 - **Aislamiento:** toda consulta filtra por el `user_id` del JWT.
 - **Idioma:** español (textos de interfaz y prompts del agente).
-- **Recordatorios:** notificación local programada al guardar; se reprograma al editar y se cancela al borrar o completar; funciona sin conexión.
+- **Recordatorios («Notificar»):** el usuario elige cuánto antes (número y minutos, horas, días o semanas; hasta 4 semanas). Notificación local programada al guardar; se reprograma al editar y se cancela al borrar o completar; funciona sin conexión. En una serie, cada repetición tiene su aviso.
 - **Origen de la tarea:** `manual`, `voice` o `text`.
 
-### Contrato del agente (referencia; el detalle va en `plan.md`)
+### Contrato del agente (referencia; el detalle va en `plan.md` de la feature 003)
 ```json
-// POST /api/v1/agent/command — petición
-{ "text": "llamar al dentista el viernes a las 3 de la tarde", "timezone": "America/Bogota" }
-// respuesta con propuesta
-{ "kind": "proposal", "title": "Llamar al dentista", "start_at": "2026-11-06T15:00:00-05:00", "notes": null }
-// respuesta con aclaración
-{ "kind": "question", "message": "¿A qué hora quieres el recordatorio?" }
+// POST /api/v1/agent/command — petición (la zona horaria es la del perfil del usuario)
+{ "text": "mueve la reunión con Pedro para las 11 de la mañana", "history": [] }
+// respuesta: "answer" (información), "question" (aclaración) o "actions" (1 a 3 acciones por confirmar)
+{ "kind": "answer",   "message": "El lunes tienes 2 tareas: …", "usage": { "used": 3, "limit": 20 } }
+{ "kind": "question", "message": "¿Cuál: la del lunes o la del viernes?", "missing": "which_task", "usage": { … } }
+{ "kind": "actions",  "message": "Esto es lo que haré:", "warnings": [],
+  "actions": [ { "id": "a1", "type": "create | update | delete", "summary": "Agendar «Llamar al dentista» · viernes 6 de noviembre · 3:00 p. m.", … } ],
+  "usage": { "used": 3, "limit": 20 } }
+// El agente NO ejecuta nada: al pulsar «Confirmar», el navegador usa la API normal (POST/PATCH/DELETE /tasks).
 ```
 
 ---
@@ -321,7 +325,7 @@ El esquema **no** lo crea el backend: `supabase-py` usa la API REST de Supabase 
 - **Degradación elegante:** sin cuota de Gemini la app sigue funcionando con el formulario manual.
 - **Observabilidad:** logs estructurados sin datos sensibles; monitoreo de errores con un plan gratuito **[POR CONFIRMAR]**.
 - **Pruebas:** cobertura mínima del 70 % en lógica de dominio (fechas, aislamiento por usuario, validación de propuestas); E2E para los flujos críticos (registro → login → crear tarea por voz o texto → confirmar → ver en calendario).
-- **Calidad del agente:** compuerta de la fase del agente: al menos **27 de 30 frases** de prueba en español (fechas relativas, sin hora, sin fecha, ambiguas) producen la propuesta o pregunta correcta.
+- **Calidad del agente:** compuerta de la fase del agente: al menos **27 de 30 frases** de creación (fechas relativas, sin hora, sin fecha, ambiguas) y **16 de 20** de gestión de agenda (consultar, modificar, eliminar, seguridad) producen el resultado correcto.
 
 ---
 
@@ -347,11 +351,11 @@ El esquema **no** lo crea el backend: `supabase-py` usa la API REST de Supabase 
 | 000 | Cimientos: repo, FastAPI con `/health`, proyectos Supabase `dev` y `prod` con migración inicial (tablas + RLS, aplicada a mano en el SQL Editor), frontend desplegado, CI | — | CI en verde, `/health` responde y una consulta de prueba a Supabase `dev` funciona |
 | 001 | Autenticación: registro, login y zona de calendario protegida | 000 | Un usuario se registra, inicia sesión y entra a su calendario; sin sesión no se accede a nada; un segundo usuario no ve sus datos |
 | 002 | Calendario y tareas (vistas mes, semana y día; CRUD; formulario manual) | 001 | Un usuario crea, mueve y borra tareas en las tres vistas |
-| 003 | Agente por texto (propuesta, aclaración, límites, tope diario) | 002 | 27 de 30 frases correctas |
+| 003 | Agente con herramientas por texto (agendar, consultar, modificar, eliminar con confirmación; límites, tope diario) | 002 | 27 de 30 frases de creación y 16 de 20 de gestión de agenda correctas |
 | 004 | Voz en la web | 003 | Dictado de extremo a extremo en Chrome y Edge de escritorio |
 | 005 | App Android y recordatorios locales | 004 | En un teléfono real, una tarea dictada suena a su hora con el backend dormido |
-| 006 | Consultas de agenda por voz *(opcional)* | 003 | — |
-| 007 | Tareas recurrentes *(opcional)* | 002 | — |
+| 006 | ~~Consultas de agenda~~ *(absorbida por la feature 003, 2026-11)* | 003 | — |
+| 007 | ~~Tareas recurrentes~~ *(absorbida por la feature 002, enmienda 2026-11-08)* | 002 | — |
 
 **Feature activa: 000.** Actualiza esta línea al cambiar de feature.
 
@@ -365,7 +369,7 @@ El esquema **no** lo crea el backend: `supabase-py` usa la API REST de Supabase 
 4. Si falta información, **pregunta** en lugar de asumir; registra la decisión en `Clarificaciones`.
 5. Propón cambios pequeños y revisables; no hagas refactors fuera del alcance de la tarea.
 6. Escribe pruebas junto con el código; no entregues funcionalidad sin ellas.
-7. El agente de IA de la aplicación **nunca escribe en la base de datos**; el código tampoco debe permitirlo.
+7. El agente de IA de la aplicación **no ejecuta escrituras**: sus herramientas de escritura solo preparan acciones para confirmar, y el código no debe darle acceso de escritura a la base. Sus herramientas de lectura se limitan al usuario de la sesión y a lo pedido.
 8. No añadas ninguna dependencia o servicio de pago o que requiera tarjeta.
 9. Al terminar, actualiza `tasks.md` y resume qué se hizo y qué sigue.
 10. Nunca ejecutes acciones destructivas (borrar datos, reescribir historial, tocar producción) sin confirmación explícita.

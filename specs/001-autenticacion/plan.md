@@ -1,6 +1,6 @@
 # 001 — Autenticación · Plan técnico
 
-> **Estado:** BORRADOR — pendiente de aprobación humana (Fase 3: Planificar). Depende de `spec.md` aprobada y de la feature 000 terminada.
+> **Estado:** APROBADO por el humano (2026-11-02) (Fase 3: Planificar). Depende de `spec.md` aprobada y de la feature 000 terminada.
 > Respeta `specs/constitution.md`. Los valores marcados «propuesta» dependen de las Clarificaciones de `spec.md`.
 
 ## 1. Decisiones de arquitectura
@@ -122,7 +122,7 @@ No hay endpoint: el cliente descarta el token (D-4).
 - `AuthProvider`: al montar, si hay token → `GET /auth/me`; mientras responde, pantalla de carga (con aviso «Despertando el servidor…» pasado un umbral, p. ej. 3 s).
 - Formularios con `label` real, validación en cliente (correo con formato; contraseña ≥ 8) y errores del servidor mapeados a mensajes en español por `code`.
 - Zona horaria: `Intl.DateTimeFormat().resolvedOptions().timeZone` enviada en el registro; el texto «Zona horaria detectada: …» la muestra.
-- Pantallas fieles a `UX/Iniciar sesión.png` y `UX/Crear cuenta.png`, con tokens de 000; botón de tema en cada una. Panel izquierdo oculto en pantallas angostas (la barra lateral/el panel de marca pasa arriba o se oculta; no existe diseño móvil: U-2).
+- Pantallas fieles a `UX/Iniciar sesión.png` y `UX/Crear cuenta.png`, con tokens de 000; botón de tema en cada una. Panel izquierdo oculto en pantallas angostas (la barra lateral/el panel de marca pasa arriba o se oculta; no existe diseño móvil: U-2). **Enmienda 2026-11-08:** el login móvil ya tiene diseño (`UX/UX-Movil/Android Iniciar sesión.png`): por debajo de 900 px `Login` muestra una **cabecera compacta** (componente `AuthHeaderCompact`: marca + botón de tema, titular, texto corto y la cita, sin la mini-tarjeta) sobre el formulario; en escritorio no cambia. `/registro` conserva el comportamiento actual (solo formulario) hasta tener diseño (U-20). Se prueba con una captura a 390 px de ancho.
 - Los estados de error/carga sin diseño (U-4) usan texto bajo el campo con el color de error de los tokens y `aria-live`.
 - `CalendarPlaceholder`: página protegida mínima que muestra el correo y «Cerrar sesión», para poder validar la gate de 001 antes de 002.
 

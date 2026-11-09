@@ -1,0 +1,51 @@
+name: CI
+
+# Pruebas unitarias y estilo en cada PR y en cada push a main.
+# NO usa secretos de Supabase: las pruebas de integración (-m integration) corren solo en local.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (ruff + pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Instalar dependencias (Python según .python-version)
+        run: uv sync --frozen
+      - name: Estilo
+        run: uv run ruff check backend
+      - name: Pruebas unitarias
+        run: uv run pytest
+
+  frontend:
+    name: Frontend (eslint + vitest + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Formato
+        run: npm run format:check
+      - name: Pruebas
+        run: npm test
+      - name: Compilación
+        run: npm run build

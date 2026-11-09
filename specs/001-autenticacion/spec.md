@@ -1,6 +1,6 @@
 # 001 — Autenticación
 
-> **Estado:** BORRADOR — pendiente de aprobación humana (Fase 1: Especificar).
+> **Estado:** APROBADO por el humano (2026-11-02) (Fase 1: Especificar).
 > Describe **qué** y **por qué**, sin tecnología (la tecnología está en `plan.md`). Depende de 000.
 
 ## Contexto y problema
@@ -44,7 +44,7 @@ No incluye verificación de correo ni recuperación de contraseña (fuera de v1 
 - **RF-016 — Aislamiento entre usuarios.** Toda consulta de datos usa la identidad de la sesión; ningún usuario ve ni modifica datos de otro. (Se prueba con dos usuarios.)
 
 ### Interfaz
-- **RF-017 — Pantallas de acceso.** `/login` y `/registro` siguen el diseño de `UX/` (dos mitades, panel de marca y formulario), en español, con enlace cruzado entre ellas.
+- **RF-017 — Pantallas de acceso.** `/login` y `/registro` siguen el diseño de `UX/` (dos mitades, panel de marca y formulario), en español, con enlace cruzado entre ellas. **[enmienda 2026-11-08, pendiente de aprobación]** En pantallas angostas (menos de 900 px, incluida la app Android) `/login` sigue `UX/UX-Movil/Android Iniciar sesión.png`: una sola columna con una **cabecera de marca compacta** (logo, botón de modo oscuro, titular, texto corto y la cita de ejemplo, sin la mini-tarjeta «PROPUESTA»), el formulario con el botón a todo el ancho, y el pie «Gratis y privado…». `/registro` en pantallas angostas muestra solo el formulario hasta que exista su diseño móvil (U-20).
 - **RF-018 — Validación en el formulario.** Los campos muestran su error junto al campo en español, antes y después de enviar (correo inválido, contraseña corta, correo repetido, credenciales incorrectas, demasiados intentos). Los errores son anunciables por lectores de pantalla.
 - **RF-019 — Estado de envío.** Mientras se envía, el botón principal queda deshabilitado y muestra progreso, para evitar envíos dobles; si el servidor está «despertando» (puede tardar), se informa.
 - **RF-020 — Tema.** Ambas pantallas tienen botón de modo claro/oscuro y respetan los tokens de marca.

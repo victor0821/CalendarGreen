@@ -1,0 +1,63 @@
+/*
+ * Tokens de marca (UX/README.md §2). Ningún componente usa colores fijos: todo pasa por estas
+ * variables para soportar modo claro y oscuro (constitución P7).
+ */
+
+:root,
+:root[data-theme='light'] {
+  --color-primary: #1b7f4c;
+  --color-primary-hover: #146b3f;
+  --color-on-primary: #ffffff;
+  --color-deep: #0e3b26;
+  --color-on-deep: #ffffff;
+  --color-bg: #f4f7f2;
+  --color-surface: #ffffff;
+  --color-tint: #e1f1e7;
+  --color-text: #12261b;
+  --color-text-muted: #4f6358;
+  --color-border: #c4d2c8;
+  --color-link: #146b3f;
+  --color-focus: #1b7f4c;
+
+  /* Estados */
+  --color-warning-bg: #fff1cc;
+  --color-warning-border: #f0c96b;
+  --color-warning-text: #5c4100;
+  --color-danger: #b3261e;
+  --color-danger-bg: #fcebea;
+  --color-done-bg: #eceeea;
+  --color-done-text: #6a766f;
+
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font-body: 'DM Sans Variable', system-ui, sans-serif;
+  --radius-md: 12px;
+  --tap-target: 44px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-primary: #1b7f4c;
+  --color-primary-hover: #23995c;
+  --color-on-primary: #ffffff;
+  --color-deep: #0e3b26;
+  --color-on-deep: #e6f2ea;
+  --color-bg: #0d1712;
+  --color-surface: #15231b;
+  --color-tint: #1c3328;
+  --color-text: #e6f2ea;
+  --color-text-muted: #9db8a8;
+  --color-border: #2c4538;
+  --color-link: #7fd3a1;
+  --color-focus: #7fd3a1;
+
+  --color-warning-bg: #3a2e0e;
+  --color-warning-border: #8a6d1c;
+  --color-warning-text: #f5deaa;
+  --color-danger: #f2b8b5;
+  --color-danger-bg: #3a1a18;
+  --color-done-bg: #1b2a22;
+  --color-done-text: #7f9a8a;
+
+  color-scheme: dark;
+}

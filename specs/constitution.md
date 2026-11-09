@@ -8,15 +8,15 @@
 
 ## 1. Propósito
 
-CalendarGreen es un calendario propio (web, PWA y app Android) donde el usuario dicta o escribe una tarea y un agente de IA **propone** agendarla; el usuario **confirma**. No depende de calendarios externos.
+CalendarGreen es un calendario propio (web, PWA y app Android) donde el usuario **habla o escribe con un agente de IA** y el agente **agenda, consulta, modifica y elimina** sus tareas; cada cambio lo **confirma** el usuario. No depende de calendarios externos.
 
 ## 2. Principios (no negociables)
 
 ### P1. La especificación manda
 Ningún código se escribe sin una `spec.md` aprobada. Si el código y la spec divergen, se actualiza primero la spec. El agente nunca salta fases ni inventa requisitos: ante ambigüedad, pregunta y lo registra en `Clarificaciones`.
 
-### P2. El agente propone, el usuario confirma
-Ninguna tarea creada por voz o texto se guarda sin una tarjeta de confirmación con título, fecha y hora. El agente de IA de la aplicación **nunca escribe en la base de datos**, y el código no debe permitirlo (no recibe herramientas ni repositorios de escritura).
+### P2. El agente prepara, el usuario confirma *(enmendado 2026-11)*
+El agente de IA **tiene herramientas** y es quien decide qué hacer con lo que el usuario le dice: agendar, consultar, modificar o eliminar tareas. Pero **ninguna herramienta de escritura ejecuta un cambio**: solo **prepara una acción** que se muestra al usuario en una tarjeta con el detalle exacto (generado por el servidor a partir de datos reales) y **solo se ejecuta cuando el usuario pulsa «Confirmar»**, a través de la misma API validada que usa el formulario. Las herramientas de lectura solo ven datos **del usuario de la sesión**, acotados a lo pedido. El código no debe dar al agente acceso de escritura a la base de datos ni a repositorios de escritura.
 
 ### P3. El agente no inventa
 Si falta la fecha o la hora, hace **una** pregunta corta. No asume valores. Todo lo que devuelve el agente se valida en el servidor antes de mostrarse (ISO 8601 con zona horaria, no anterior a hoy).
@@ -150,3 +150,4 @@ Estas decisiones bloquean o condicionan specs futuras. Se resuelven aquí antes 
 | 2026-11-02 | Borrador inicial | Humano (2026-11-02) |
 | 2026-11-02 | Python 3.14; archivos de uv y `.env` en la raíz; monorepo sin repositorio remoto por ahora (CI/PR diferidos) | Humano (2026-11-02) |
 | 2026-11-02 | **Se creará repositorio remoto para el despliegue:** se reactivan rama `main`, PR y GitHub Actions; C-3 reabierta (visibilidad y nombre) | Humano (2026-11-02) |
+| 2026-11 | **P2 enmendado:** el agente pasa de «solo propone» a «tiene herramientas (agendar, consultar, modificar, eliminar)»; toda escritura sigue exigiendo confirmación del usuario mediante tarjeta. Motivo: la idea central del producto es que el usuario hable con el agente y este agende por él | Humano (2026-11, por conversación) |

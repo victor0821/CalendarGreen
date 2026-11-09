@@ -11,7 +11,41 @@ dependencies = [
     "strands-agents[gemini]>=1.63.0",
     "strands-agents-tools>=0.8.11",
     "python-dotenv>=1.2.4",
+    "fastapi>=0.162.0",
+    "uvicorn[standard]>=0.54.0",
+    "pydantic-settings>=2.16.2",
+    "supabase>=2.33.0",
+    "argon2-cffi>=25.1.0",
+    "pyjwt>=2.15.1",
+    "email-validator>=2.3.0",
+    "tzdata>=2026.6",
 ]
 
 [tool.uv]
 package = false
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.2.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.17.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: pruebas contra Supabase dev (se ejecutan con -m integration)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+src = ["backend"]
+# El prototipo del agente (backend/app/agent) se revisa en la feature 003; no se toca en 000.
+extend-exclude = [".venv", "backend/app/agent"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

@@ -1,6 +1,6 @@
 # 000 — Cimientos · Plan técnico
 
-> **Estado:** BORRADOR — pendiente de aprobación humana (Fase 3: Planificar). Depende de `spec.md` aprobada; si la spec cambia, se ajusta este plan.
+> **Estado:** APROBADO por el humano (2026-11-02) (Fase 3: Planificar). Depende de `spec.md` aprobada; si la spec cambia, se ajusta este plan.
 > Respeta `specs/constitution.md` (aprobada).
 
 ## 1. Decisiones de arquitectura
@@ -35,7 +35,8 @@
 ├── pyproject.toml / uv.lock          # AGREGAR dependencias con uv add
 ├── backend/
 │   ├── app/
-│   │   ├── main.py                   # create_app(), registro de rutas y manejadores
+│   │   ├── factory.py                # create_app(settings, repository): rutas, CORS y manejadores
+│   │   ├── main.py                   # `app` para uvicorn; sale con mensaje claro si falta configuración
 │   │   ├── api/
 │   │   │   ├── router.py             # APIRouter con prefijo /api/v1
 │   │   │   └── health.py             # GET /health

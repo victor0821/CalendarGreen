@@ -1,6 +1,6 @@
 # 000 — Cimientos
 
-> **Estado:** BORRADOR — pendiente de aprobación humana (Fase 1: Especificar).
+> **Estado:** APROBADO por el humano (2026-11-02) (Fase 1: Especificar).
 > Describe **qué** debe existir y **por qué**, sin tecnología (la tecnología está en `plan.md`).
 
 ## Contexto y problema
